@@ -1,6 +1,6 @@
 
-file(GLOB sources *.cpp)
-file(GLOB headers *.hpp)
+file(GLOB_RECURSE sources *.cpp)
+file(GLOB_RECURSE headers *.h *.hpp)
 
 source_group(src FILES ${sources} ${headers})
 
