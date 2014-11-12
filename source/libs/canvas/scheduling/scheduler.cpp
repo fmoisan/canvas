@@ -1,6 +1,5 @@
-#include <canvas/scheduling/scheduler.hpp>
+#include "canvas/scheduling/scheduler.hpp"
 
-#include <atomic>
 #include <condition_variable>
 #include <thread>
 
@@ -60,13 +59,15 @@ namespace canvas
     };
 
     scheduler::scheduler()
-        : m_tasks(std::make_shared<task_queue>())
+        : m_tasks(new task_queue())
+        , m_activeWorkers(0)
     {
         setup_workers(std::thread::hardware_concurrency());
     }
 
     scheduler::scheduler(std::size_t worker_count)
-        : m_tasks(std::make_shared<task_queue>())
+        : m_tasks(new task_queue())
+        , m_activeWorkers(0)
     {
         setup_workers(worker_count);
     }
@@ -81,9 +82,14 @@ namespace canvas
         }
     }
 
-    std::size_t scheduler::get_worker_count() const
+    std::size_t scheduler::worker_count() const
     {
         return m_workers.size();
+    }
+
+    std::size_t scheduler::idle_worker_count() const
+    {
+        return worker_count() - m_activeWorkers;
     }
 
     void scheduler::add_task(task_type task)
@@ -97,17 +103,21 @@ namespace canvas
 
         for (std::size_t i = 0; i < worker_count; ++i)
         {
-            m_workers.emplace_back(run_tasks, m_tasks);
+            m_workers.emplace_back(&scheduler::run_tasks, this);
         }
     }
 
-    void scheduler::run_tasks(std::shared_ptr<task_queue> tasks)
+    void scheduler::run_tasks()
     {
-        while (!tasks->cancelled())
+        while (!m_tasks->cancelled())
         {
-            if (auto task = tasks->wait_for_next_task())
+            if (auto task = m_tasks->wait_for_next_task())
             {
+                ++m_activeWorkers;
+
                 task();
+
+                --m_activeWorkers;
             }
         }
     }

@@ -1,9 +1,8 @@
 #include <catch.hpp>
 
-#include <canvas/scheduling/scheduler.hpp>
+#include "canvas/scheduling/scheduler.hpp"
 
 #include <atomic>
-#include <condition_variable>
 #include <thread>
 
 namespace details
@@ -14,7 +13,7 @@ namespace details
     {
         while (!predicate())
         {
-            std::this_thread::sleep_for(std::chrono::microseconds(1));
+            std::this_thread::sleep_for(std::chrono::nanoseconds(1));
         }
     }
 }
@@ -23,14 +22,14 @@ TEST_CASE("scheduler - has [core count] amount of workers by default")
 {
     canvas::scheduler scheduler;
 
-    CHECK(scheduler.get_worker_count() == std::thread::hardware_concurrency());
+    CHECK(scheduler.worker_count() == std::thread::hardware_concurrency());
 }
 
 TEST_CASE("scheduler - can be constructed with custom worker count")
 {
     canvas::scheduler scheduler(2);
 
-    CHECK(scheduler.get_worker_count() == 2);
+    CHECK(scheduler.worker_count() == 2);
 }
 
 TEST_CASE("scheduler - add_task schedules tasks immediately")
@@ -69,4 +68,27 @@ TEST_CASE("scheduler - multiple tasks are all ran to completion")
     { return completed_count == task_count; });
 
     CHECK(completed_count == task_count);
+}
+
+TEST_CASE("scheduler - idle_worker_count gets the number of idle threads")
+{
+    canvas::scheduler scheduler;
+    CHECK(scheduler.idle_worker_count() == scheduler.worker_count());
+
+    std::atomic<bool> task_blocked(false);
+
+    scheduler.add_task([&]
+    {
+        task_blocked = true;
+
+        details::wait_until([&]
+        { return !task_blocked; });
+    });
+
+    details::wait_until([&]
+    { return task_blocked.load(); });
+
+    CHECK(scheduler.idle_worker_count() == scheduler.worker_count() - 1);
+
+    task_blocked = false;
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -22,7 +23,8 @@ namespace canvas
 
         ~scheduler();
 
-        std::size_t get_worker_count() const;
+        std::size_t worker_count() const;
+        std::size_t idle_worker_count() const;
 
         void add_task(task_type task);
 
@@ -31,10 +33,12 @@ namespace canvas
 
     private:
         class task_queue;
-        static void run_tasks(std::shared_ptr<task_queue> tasks);
+        void run_tasks();
 
     private:
-        std::shared_ptr<task_queue> m_tasks;
+        std::unique_ptr<task_queue> m_tasks;
         std::vector<std::thread> m_workers;
+
+        std::atomic<std::size_t> m_activeWorkers;
     };
 }
