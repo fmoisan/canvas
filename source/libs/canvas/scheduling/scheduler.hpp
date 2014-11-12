@@ -1,9 +1,11 @@
 #pragma once
 
 #include <cstddef>
+#include <functional>
 #include <memory>
-#include <thread>
 #include <vector>
+
+namespace std { class thread; }
 
 namespace canvas
 {

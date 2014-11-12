@@ -1,10 +1,8 @@
 #include <canvas/scheduling/scheduler.hpp>
 
-#include <condition_variable>
-
 #include <atomic>
-
-#include <iostream>
+#include <condition_variable>
+#include <thread>
 
 namespace canvas
 {
