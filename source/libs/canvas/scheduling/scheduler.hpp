@@ -35,7 +35,6 @@ namespace canvas
 
     private:
         std::shared_ptr<task_queue> m_tasks;
-
-        std::vector<std::thread> m_pool;
+        std::vector<std::thread> m_workers;
     };
 }

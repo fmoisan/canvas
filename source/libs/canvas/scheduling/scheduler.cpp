@@ -75,15 +75,15 @@ namespace canvas
     {
         m_tasks->cancel();
 
-        for (auto& thread : m_pool)
+        for (auto& worker : m_workers)
         {
-            thread.join();
+            worker.join();
         }
     }
 
     std::size_t scheduler::get_worker_count() const
     {
-        return m_pool.size();
+        return m_workers.size();
     }
 
     void scheduler::add_task(task_type task)
@@ -93,11 +93,11 @@ namespace canvas
 
     void scheduler::setup_workers(std::size_t worker_count)
     {
-        m_pool.reserve(worker_count);
+        m_workers.reserve(worker_count);
 
         for (std::size_t i = 0; i < worker_count; ++i)
         {
-            m_pool.emplace_back(run_tasks, m_tasks);
+            m_workers.emplace_back(run_tasks, m_tasks);
         }
     }
 
