@@ -9,7 +9,7 @@
 namespace details
 {
 
-    template < typename predicate_t >
+    template <typename predicate_t>
     void wait_until(predicate_t predicate)
     {
         while (!predicate())
@@ -17,7 +17,6 @@ namespace details
             std::this_thread::sleep_for(std::chrono::microseconds(1));
         }
     }
-
 }
 
 TEST_CASE("scheduler - has [core count] amount of workers by default")
@@ -45,7 +44,8 @@ TEST_CASE("scheduler - add_task schedules tasks immediately")
         called = true;
     });
 
-    details::wait_until([&] { return called.load(); });
+    details::wait_until([&]
+    { return called.load(); });
 
     CHECK(called);
 }
@@ -65,7 +65,8 @@ TEST_CASE("scheduler - multiple tasks are all ran to completion")
         });
     }
 
-    details::wait_until([&] { return completed_count == task_count; });
+    details::wait_until([&]
+    { return completed_count == task_count; });
 
     CHECK(completed_count == task_count);
 }

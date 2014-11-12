@@ -9,7 +9,6 @@ namespace canvas
     class scheduler::task_queue
     {
     public:
-
         bool cancelled() const
         {
             return m_cancelled;
@@ -37,7 +36,8 @@ namespace canvas
 
             {
                 std::unique_lock<std::mutex> lock(m_mutex);
-                m_available.wait(lock, [&] { return !m_tasks.empty() || m_cancelled; });
+                m_available.wait(lock, [&]
+                { return !m_tasks.empty() || m_cancelled; });
 
                 if (!m_tasks.empty() && !m_cancelled)
                 {
@@ -54,7 +54,7 @@ namespace canvas
         std::mutex m_mutex;
         std::condition_variable m_available;
 
-        std::atomic<bool> m_cancelled{false};
+        std::atomic<bool> m_cancelled{ false };
 
         std::vector<scheduler::task_type> m_tasks;
     };
@@ -75,7 +75,7 @@ namespace canvas
     {
         m_tasks->cancel();
 
-        for (auto & thread : m_pool)
+        for (auto& thread : m_pool)
         {
             thread.join();
         }

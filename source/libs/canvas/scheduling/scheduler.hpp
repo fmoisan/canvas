@@ -5,14 +5,17 @@
 #include <memory>
 #include <vector>
 
-namespace std { class thread; }
+namespace std
+{
+    class thread;
+}
 
 namespace canvas
 {
     class scheduler
     {
     public:
-        using task_type = std::function < void() > ;
+        using task_type = std::function<void()>;
 
         scheduler();
         explicit scheduler(std::size_t worker_count);
