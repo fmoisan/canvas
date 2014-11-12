@@ -56,7 +56,7 @@ namespace canvas
         std::mutex m_mutex;
         std::condition_variable m_available;
 
-        std::atomic<bool> m_cancelled = false;
+        std::atomic<bool> m_cancelled{false};
 
         std::vector<scheduler::task_type> m_tasks;
     };

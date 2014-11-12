@@ -53,7 +53,7 @@ TEST_CASE("scheduler - add_task schedules tasks immediately")
 TEST_CASE("scheduler - multiple tasks are all ran to completion")
 {
     const int task_count = 100;
-    std::atomic<int> completed_count;
+    std::atomic<int> completed_count(0);
 
     canvas::scheduler scheduler;
 
