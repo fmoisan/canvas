@@ -38,7 +38,7 @@ namespace canvas
                 m_available.wait(lock, [&]
                 { return !m_tasks.empty() || m_cancelled; });
 
-                if (!m_tasks.empty() && !m_cancelled)
+                if (!m_cancelled)
                 {
                     auto it = m_tasks.begin();
                     task = *it;
@@ -53,21 +53,46 @@ namespace canvas
         std::mutex m_mutex;
         std::condition_variable m_available;
 
-        std::atomic<bool> m_cancelled{ false };
+        std::atomic<bool> m_cancelled{false};
 
         std::vector<scheduler::task_type> m_tasks;
     };
 
+    class scheduler::active_worker_scope
+    {
+    public:
+
+        active_worker_scope(scheduler * scheduler)
+            : m_scheduler{scheduler}
+        {
+            std::unique_lock<std::mutex> lock(m_scheduler->m_task_completed_mutex);
+            ++m_scheduler->m_active_worker_count;
+        }
+
+        ~active_worker_scope()
+        {
+            {
+                std::unique_lock<std::mutex> lock(m_scheduler->m_task_completed_mutex);
+                --m_scheduler->m_active_worker_count;
+            }
+
+            m_scheduler->m_task_completed_condition.notify_one();
+        }
+
+    private:
+        scheduler * m_scheduler;
+    };
+
     scheduler::scheduler()
-        : m_tasks(new task_queue())
-        , m_activeWorkers(0)
+        : m_tasks{new task_queue()}
+        , m_active_worker_count{0}
     {
         setup_workers(std::thread::hardware_concurrency());
     }
 
     scheduler::scheduler(std::size_t worker_count)
-        : m_tasks(new task_queue())
-        , m_activeWorkers(0)
+        : m_tasks{new task_queue()}
+        , m_active_worker_count{0}
     {
         setup_workers(worker_count);
     }
@@ -89,12 +114,22 @@ namespace canvas
 
     std::size_t scheduler::idle_worker_count() const
     {
-        return worker_count() - m_activeWorkers;
+        return worker_count() - m_active_worker_count;
     }
 
     void scheduler::add_task(task_type task)
     {
         m_tasks->add_task(task);
+    }
+
+    void scheduler::join()
+    {
+        std::unique_lock<std::mutex> lock{m_task_completed_mutex};
+
+        m_task_completed_condition.wait(lock, [this]
+        {
+            return m_active_worker_count == 0;
+        });
     }
 
     void scheduler::setup_workers(std::size_t worker_count)
@@ -113,11 +148,8 @@ namespace canvas
         {
             if (auto task = m_tasks->wait_for_next_task())
             {
-                ++m_activeWorkers;
-
+                active_worker_scope scope{this};
                 task();
-
-                --m_activeWorkers;
             }
         }
     }

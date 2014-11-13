@@ -92,3 +92,28 @@ TEST_CASE("scheduler - idle_worker_count gets the number of idle threads")
 
     task_blocked = false;
 }
+
+TEST_CASE("scheduler - all workers are idle after joining")
+{
+    canvas::scheduler scheduler;
+
+    std::atomic<bool> task_blocked{true};
+
+    for (std::size_t i = 0; i < scheduler.worker_count(); ++i)
+    {
+        scheduler.add_task([&]
+        {
+            details::wait_until([&]
+            { return !task_blocked; });
+        });
+    }
+
+    details::wait_until([&]
+    { return scheduler.idle_worker_count() == 0; });
+
+    task_blocked = false;
+
+    scheduler.join();
+
+    CHECK(scheduler.idle_worker_count() == scheduler.worker_count());
+}
