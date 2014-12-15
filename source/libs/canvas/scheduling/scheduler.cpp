@@ -1,5 +1,6 @@
 #include "canvas/scheduling/scheduler.hpp"
 
+#include <atomic>
 #include <condition_variable>
 #include <thread>
 
@@ -22,7 +23,7 @@ namespace canvas
         void add_task(scheduler::task_type task)
         {
             {
-                std::unique_lock<std::mutex> lock(m_mutex);
+                std::unique_lock<std::mutex> lock{m_mutex};
                 m_tasks.emplace_back(task);
             }
 
@@ -34,12 +35,10 @@ namespace canvas
             task_type task{};
 
             {
-                std::unique_lock<std::mutex> lock(m_mutex);
-                m_available.wait(lock, [&]
-                { return !m_tasks.empty() || m_cancelled; });
+                std::unique_lock<std::mutex> lock{m_mutex};
+                m_available.wait(lock, [&] { return !m_tasks.empty() || m_cancelled; });
 
-                if (!m_cancelled)
-                {
+                if (!m_cancelled) {
                     auto it = m_tasks.begin();
                     task = *it;
                     m_tasks.erase(it);
@@ -61,18 +60,17 @@ namespace canvas
     class scheduler::active_worker_scope
     {
     public:
-
-        active_worker_scope(scheduler * scheduler)
+        active_worker_scope(scheduler* scheduler)
             : m_scheduler{scheduler}
         {
-            std::unique_lock<std::mutex> lock(m_scheduler->m_task_completed_mutex);
+            std::unique_lock<std::mutex> lock{m_scheduler->m_task_completed_mutex};
             ++m_scheduler->m_active_worker_count;
         }
 
         ~active_worker_scope()
         {
             {
-                std::unique_lock<std::mutex> lock(m_scheduler->m_task_completed_mutex);
+                std::unique_lock<std::mutex> lock{m_scheduler->m_task_completed_mutex};
                 --m_scheduler->m_active_worker_count;
             }
 
@@ -80,18 +78,18 @@ namespace canvas
         }
 
     private:
-        scheduler * m_scheduler;
+        scheduler* m_scheduler;
     };
 
     scheduler::scheduler()
-        : m_tasks{new task_queue()}
+        : m_tasks{std::make_unique<task_queue>()}
         , m_active_worker_count{0}
     {
         setup_workers(std::thread::hardware_concurrency());
     }
 
     scheduler::scheduler(std::size_t worker_count)
-        : m_tasks{new task_queue()}
+        : m_tasks{std::make_unique<task_queue>()}
         , m_active_worker_count{0}
     {
         setup_workers(worker_count);
@@ -101,8 +99,7 @@ namespace canvas
     {
         m_tasks->cancel();
 
-        for (auto& worker : m_workers)
-        {
+        for (auto& worker : m_workers) {
             worker.join();
         }
     }
@@ -126,28 +123,22 @@ namespace canvas
     {
         std::unique_lock<std::mutex> lock{m_task_completed_mutex};
 
-        m_task_completed_condition.wait(lock, [this]
-        {
-            return m_active_worker_count == 0;
-        });
+        m_task_completed_condition.wait(lock, [this] { return m_active_worker_count == 0; });
     }
 
     void scheduler::setup_workers(std::size_t worker_count)
     {
         m_workers.reserve(worker_count);
 
-        for (std::size_t i = 0; i < worker_count; ++i)
-        {
+        for (std::size_t i = 0; i < worker_count; ++i) {
             m_workers.emplace_back(&scheduler::run_tasks, this);
         }
     }
 
     void scheduler::run_tasks()
     {
-        while (!m_tasks->cancelled())
-        {
-            if (auto task = m_tasks->wait_for_next_task())
-            {
+        while (!m_tasks->cancelled()) {
+            if (auto task = m_tasks->wait_for_next_task()) {
                 active_worker_scope scope{this};
                 task();
             }
