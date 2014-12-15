@@ -9,10 +9,7 @@ namespace canvas
     class scheduler::task_queue
     {
     public:
-        bool cancelled() const
-        {
-            return m_cancelled;
-        }
+        bool cancelled() const { return m_cancelled; }
 
         void cancel()
         {
@@ -104,26 +101,22 @@ namespace canvas
         }
     }
 
-    std::size_t scheduler::worker_count() const
-    {
-        return m_workers.size();
-    }
+    std::size_t scheduler::worker_count() const { return m_workers.size(); }
 
     std::size_t scheduler::idle_worker_count() const
     {
         return worker_count() - m_active_worker_count;
     }
 
-    void scheduler::add_task(task_type task)
-    {
-        m_tasks->add_task(task);
-    }
+    void scheduler::add_task(task_type task) { m_tasks->add_task(task); }
 
     void scheduler::join()
     {
         std::unique_lock<std::mutex> lock{m_task_completed_mutex};
 
-        m_task_completed_condition.wait(lock, [this] { return m_active_worker_count == 0; });
+        m_task_completed_condition.wait(lock, [this] {
+            return m_active_worker_count == 0;
+        });
     }
 
     void scheduler::setup_workers(std::size_t worker_count)

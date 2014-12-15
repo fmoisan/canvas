@@ -36,9 +36,7 @@ TEST_CASE("scheduler - add_task schedules tasks immediately")
 
     canvas::scheduler scheduler;
 
-    scheduler.add_task([&] {
-        called = true;
-    });
+    scheduler.add_task([&] { called = true; });
 
     details::wait_until([&] { return called.load(); });
 
@@ -53,9 +51,7 @@ TEST_CASE("scheduler - multiple tasks are all ran to completion")
     canvas::scheduler scheduler;
 
     for (int i = 0; i < task_count; ++i) {
-        scheduler.add_task([&] {
-            ++completed_count;
-        });
+        scheduler.add_task([&] { ++completed_count; });
     }
 
     details::wait_until([&] { return completed_count == task_count; });
@@ -73,8 +69,7 @@ TEST_CASE("scheduler - idle_worker_count gets the number of idle threads")
     scheduler.add_task([&] {
         task_blocked = true;
 
-        details::wait_until([&]
-        { return !task_blocked; });
+        details::wait_until([&] { return !task_blocked; });
     });
 
     details::wait_until([&] { return task_blocked.load(); });
@@ -92,8 +87,7 @@ TEST_CASE("scheduler - all workers are idle after joining")
 
     for (std::size_t i = 0; i < scheduler.worker_count(); ++i) {
         scheduler.add_task([&] {
-            details::wait_until([&]
-            { return !task_blocked; });
+            details::wait_until([&] { return !task_blocked; });
         });
     }
 

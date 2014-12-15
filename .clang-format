@@ -1,7 +1,7 @@
 # BasedOnStyle:  WebKit
 AccessModifierOffset: -4
 AlignEscapedNewlinesLeft: false
-AlignAfterOpenBracket: false
+# AlignAfterOpenBracket: false
 AlignTrailingComments: false
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: true
