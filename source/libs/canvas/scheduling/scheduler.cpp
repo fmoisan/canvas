@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <deque>
 #include <thread>
 
 namespace canvas
@@ -29,20 +30,16 @@ namespace canvas
 
         task_type wait_for_next_task()
         {
-            task_type task{};
+            std::unique_lock<std::mutex> lock{m_mutex};
+            m_available.wait(lock, [&] { return !m_tasks.empty() || m_cancelled; });
 
-            {
-                std::unique_lock<std::mutex> lock{m_mutex};
-                m_available.wait(lock, [&] { return !m_tasks.empty() || m_cancelled; });
-
-                if (!m_cancelled) {
-                    auto it = m_tasks.begin();
-                    task = *it;
-                    m_tasks.erase(it);
-                }
+            if (!m_cancelled) {
+                auto task = std::move(m_tasks.front());
+                m_tasks.pop_front();
+                return task;
             }
 
-            return task;
+            return task_type{};
         }
 
     private:
@@ -51,7 +48,7 @@ namespace canvas
 
         std::atomic<bool> m_cancelled{false};
 
-        std::vector<scheduler::task_type> m_tasks;
+        std::deque<scheduler::task_type> m_tasks;
     };
 
     class scheduler::active_worker_scope
@@ -82,14 +79,14 @@ namespace canvas
         : m_tasks{std::make_unique<task_queue>()}
         , m_active_worker_count{0}
     {
-        setup_workers(std::thread::hardware_concurrency());
+        create_workers(std::thread::hardware_concurrency());
     }
 
     scheduler::scheduler(std::size_t worker_count)
         : m_tasks{std::make_unique<task_queue>()}
         , m_active_worker_count{0}
     {
-        setup_workers(worker_count);
+        create_workers(worker_count);
     }
 
     scheduler::~scheduler()
@@ -101,14 +98,20 @@ namespace canvas
         }
     }
 
-    std::size_t scheduler::worker_count() const { return m_workers.size(); }
+    std::size_t scheduler::worker_count() const
+    {
+        return m_workers.size();
+    }
 
     std::size_t scheduler::idle_worker_count() const
     {
         return worker_count() - m_active_worker_count;
     }
 
-    void scheduler::add_task(task_type task) { m_tasks->add_task(task); }
+    void scheduler::add_task(task_type task)
+    {
+        m_tasks->add_task(task);
+    }
 
     void scheduler::join()
     {
@@ -119,7 +122,7 @@ namespace canvas
         });
     }
 
-    void scheduler::setup_workers(std::size_t worker_count)
+    void scheduler::create_workers(std::size_t worker_count)
     {
         m_workers.reserve(worker_count);
 

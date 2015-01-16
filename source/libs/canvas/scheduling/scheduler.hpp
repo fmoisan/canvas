@@ -32,7 +32,7 @@ namespace canvas
         void join();
 
     private:
-        void setup_workers(std::size_t worker_count);
+        void create_workers(std::size_t worker_count);
 
     private:
         class active_worker_scope;
