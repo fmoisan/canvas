@@ -18,7 +18,7 @@ namespace canvas
             m_available.notify_all();
         }
 
-        void add_task(scheduler::task_type task)
+        void add_task(task_type task)
         {
             {
                 std::unique_lock<std::mutex> lock{m_mutex};
@@ -48,7 +48,7 @@ namespace canvas
 
         std::atomic<bool> m_cancelled{false};
 
-        std::deque<scheduler::task_type> m_tasks;
+        std::deque<task_type> m_tasks;
     };
 
     class scheduler::active_worker_scope
