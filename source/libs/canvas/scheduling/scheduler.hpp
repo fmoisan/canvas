@@ -24,8 +24,8 @@ namespace canvas
 
         ~scheduler();
 
-        std::size_t worker_count() const;
-        std::size_t idle_worker_count() const;
+        auto worker_count() const -> std::size_t;
+        auto idle_worker_count() const -> std::size_t;
 
         void add_task(task_type task);
 

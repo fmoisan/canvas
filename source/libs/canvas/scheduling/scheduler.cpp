@@ -10,7 +10,7 @@ namespace canvas
     class scheduler::task_queue
     {
     public:
-        bool cancelled() const { return m_cancelled; }
+        auto cancelled() const -> bool { return m_cancelled; }
 
         void cancel()
         {
@@ -28,7 +28,7 @@ namespace canvas
             m_available.notify_one();
         }
 
-        task_type wait_for_next_task()
+        auto wait_for_next_task() -> task_type
         {
             std::unique_lock<std::mutex> lock{m_mutex};
             m_available.wait(lock, [&] { return !m_tasks.empty() || m_cancelled; });
@@ -98,12 +98,12 @@ namespace canvas
         }
     }
 
-    std::size_t scheduler::worker_count() const
+    auto scheduler::worker_count() const -> std::size_t
     {
         return m_workers.size();
     }
 
-    std::size_t scheduler::idle_worker_count() const
+    auto scheduler::idle_worker_count() const -> std::size_t
     {
         return worker_count() - m_active_worker_count;
     }
