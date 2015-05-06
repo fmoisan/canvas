@@ -30,13 +30,13 @@ TEST_CASE("scheduler - can be constructed with custom worker count")
     CHECK(scheduler.worker_count() == 2);
 }
 
-TEST_CASE("scheduler - add_task schedules tasks immediately")
+TEST_CASE("scheduler - schedule_task schedules tasks immediately")
 {
     std::atomic<bool> called{false};
 
     canvas::scheduler scheduler;
 
-    scheduler.add_task([&] { called = true; });
+    scheduler.schedule_task([&] { called = true; });
 
     details::wait_until([&] { return called.load(); });
 
@@ -51,10 +51,32 @@ TEST_CASE("scheduler - multiple tasks are all ran to completion")
     canvas::scheduler scheduler;
 
     for (int i = 0; i < task_count; ++i) {
-        scheduler.add_task([&] { ++completed_count; });
+        scheduler.schedule_task([&] { ++completed_count; });
     }
 
     details::wait_until([&] { return completed_count == task_count; });
 
     CHECK(completed_count == task_count);
+}
+
+TEST_CASE("scheduler - tasks can schedule other tasks")
+{
+    const int generating_task_count{100};
+    const int sub_task_count{100};
+
+    std::atomic<int> completed_count{0};
+
+    canvas::scheduler scheduler;
+
+    for (auto i = 0; i < generating_task_count; ++i) {
+        scheduler.schedule_task([&] {
+            for (auto i = 0; i < sub_task_count; ++i)
+                scheduler.schedule_task([&completed_count] { ++completed_count; });
+        });
+    }
+
+    auto const total_task_count = generating_task_count * sub_task_count;
+    details::wait_until([&] { return completed_count == total_task_count; });
+
+    CHECK(completed_count == total_task_count);
 }

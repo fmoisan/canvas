@@ -77,7 +77,7 @@ namespace canvas
         return m_workers.size();
     }
 
-    void scheduler::add_task(task_type task)
+    void scheduler::schedule_task(task_type task)
     {
         m_tasks->enqueue(task);
     }

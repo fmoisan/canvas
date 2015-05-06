@@ -23,7 +23,7 @@ namespace canvas
 
         auto worker_count() const -> std::size_t;
 
-        void add_task(task_type task);
+        void schedule_task(task_type task);
 
     private:
         void create_workers(std::size_t worker_count);
