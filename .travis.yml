@@ -1,0 +1,25 @@
+language: c++
+
+compiler:
+    - clang
+    - gcc
+
+before_install:
+    - sudo add-apt-repository 'deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu precise main'
+    - sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main'
+    - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+    - sudo apt-get update -qq
+
+install:
+    - sudo apt-get install -qq g++-4.9
+    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 20
+
+    - if [ "$CXX" == "clang++" ]; then sudo apt-get install -qq clang-3.5; fi
+    - if [ "$CXX" == "clang++" ]; then export CXX="clang++-3.5"; fi
+
+    - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9"; fi
+
+script:
+    - cd build
+    - cmake ../source
+    - make
