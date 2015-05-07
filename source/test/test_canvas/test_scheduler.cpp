@@ -3,6 +3,7 @@
 #include "canvas/scheduling/scheduler.hpp"
 
 #include <atomic>
+#include <cstdlib>
 #include <thread>
 
 namespace details
@@ -10,8 +11,11 @@ namespace details
     template <typename predicate_t>
     void wait_until(predicate_t predicate)
     {
+        int elapsed_milliseconds = 0;
         while (!predicate()) {
-            std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+            std::this_thread::sleep_for(std::chrono::microseconds(1));
+            if (++elapsed_milliseconds > 1000000)
+                std::exit(42);
         }
     }
 }
