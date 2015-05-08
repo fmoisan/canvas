@@ -65,7 +65,7 @@ TEST_CASE("scheduler - multiple tasks are all ran to completion")
 
 TEST_CASE("scheduler - tasks can schedule other tasks")
 {
-    const int generating_task_count{100};
+    const int generating_task_count{10};
     const int sub_task_count{100};
 
     std::atomic<int> completed_count{0};
