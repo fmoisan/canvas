@@ -13,6 +13,8 @@ namespace canvas
     public:
         auto cancelled() const -> bool { return m_cancelled; }
 
+        auto worker_done() -> void { m_available.notify_one(); }
+
         void cancel()
         {
             m_cancelled = true;
@@ -94,10 +96,10 @@ namespace canvas
 
     void scheduler::run_tasks()
     {
-        while (!m_tasks->cancelled()) {
-            if (auto task = m_tasks->dequeue()) {
-                task();
-            }
+        while (auto task = m_tasks->dequeue()) {
+            task();
         }
+
+        m_tasks->worker_done();
     }
 }
