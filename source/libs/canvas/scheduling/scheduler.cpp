@@ -11,8 +11,6 @@ namespace canvas
     class scheduler::task_queue
     {
     public:
-        auto cancelled() const -> bool { return m_cancelled; }
-
         auto worker_done() -> void { m_available.notify_one(); }
 
         void cancel()
