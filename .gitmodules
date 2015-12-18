@@ -1,3 +1,6 @@
 [submodule "source/external/catch"]
 	path = source/external/catch
 	url = https://github.com/fmoisan/Catch.git
+[submodule "source/external/sfml"]
+	path = source/external/sfml
+	url = https://github.com/fmoisan/SFML

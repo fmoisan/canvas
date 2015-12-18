@@ -28,4 +28,4 @@ source_group(cmake FILES ${config})
 source_group(cmake\\compiler FILES ${compilers})
 source_group(cmake\\modules FILES ${modules})
 
-add_custom_target(cmake SOURCES ${config} ${compilers} ${modules})
+add_custom_target(canvas_config SOURCES ${config} ${compilers} ${modules})
