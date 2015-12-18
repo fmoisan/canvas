@@ -1,12 +1,14 @@
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/compiler ${CMAKE_MODULE_PATH})
 
+cmake_policy(SET CMP0054 NEW)
+
 # compiler settings
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     include(clang)
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     include(gcc)
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     include(msvc)
 endif()
 
