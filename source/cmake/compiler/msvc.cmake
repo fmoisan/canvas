@@ -4,7 +4,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
 
 # no rtti
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GR-")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GR-")
 
 # exceptions
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
