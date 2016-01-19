@@ -340,12 +340,10 @@ private:
         else
             i = 0;
         stream << Text(_string,
-                       TextAttributes().setIndent(indent + i).setInitialIndent(
-                       indent)) << "\n";
+                       TextAttributes().setIndent(indent + i).setInitialIndent(indent)) << "\n";
     }
 
-    struct SummaryColumn
-    {
+    struct SummaryColumn {
 
         SummaryColumn(std::string const& _label, Colour::Code _colour)
             : label(_label)

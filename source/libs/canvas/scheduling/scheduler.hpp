@@ -12,6 +12,7 @@ namespace canvas
     class scheduler
     {
         class task_queue;
+
     public:
         using task_type = std::function<void()>;
 
