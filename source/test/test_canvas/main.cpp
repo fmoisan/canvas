@@ -173,6 +173,7 @@ private:
             case ResultWas::Unknown:
             case ResultWas::FailureBit:
             case ResultWas::Exception:
+            case ResultWas::FatalErrorCondition:
                 passOrFail = "** internal error **";
                 colour = Colour::Error;
                 break;
@@ -487,7 +488,7 @@ int main(int argc, char* argv[])
     auto& configData = session.configData();
     configData.verbosity = Catch::Verbosity::Normal;
     configData.showDurations = Catch::ShowDurations::Always;
-    configData.reporterName = "canvas_reporter";
+    configData.reporterNames.push_back("canvas_reporter");
 
     int result = session.applyCommandLine(argc, argv);
     return result == 0 ? session.run() : result;
