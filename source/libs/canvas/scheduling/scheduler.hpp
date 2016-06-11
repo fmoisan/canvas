@@ -9,28 +9,27 @@
 
 namespace canvas
 {
-    class scheduler
-    {
-        class task_queue;
+class scheduler
+{
+    class task_queue;
+public:
+    using task_type = std::function<void()>;
 
-    public:
-        using task_type = std::function<void()>;
+    scheduler();
+    explicit scheduler(std::size_t worker_count);
 
-        scheduler();
-        explicit scheduler(std::size_t worker_count);
+    ~scheduler();
 
-        ~scheduler();
+    std::size_t worker_count() const;
 
-        auto worker_count() const -> std::size_t;
+    void schedule_task(task_type task);
 
-        void schedule_task(task_type task);
+private:
+    void create_workers(std::size_t worker_count);
+    void run_tasks();
 
-    private:
-        void create_workers(std::size_t worker_count);
-        void run_tasks();
-
-    private:
-        std::unique_ptr<task_queue> m_tasks;
-        std::vector<std::thread> m_workers;
-    };
+private:
+    std::unique_ptr<task_queue> m_tasks;
+    std::vector<std::thread> m_workers;
+};
 }

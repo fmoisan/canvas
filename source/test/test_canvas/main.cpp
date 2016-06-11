@@ -72,12 +72,13 @@ public:
         if (m_headerPrinted) {
             if (m_config->showDurations() == ShowDurations::Always)
                 stream << "Completed in " << _sectionStats.durationInSeconds << "s"
-                       << std::endl;
+                << std::endl;
             m_headerPrinted = false;
-        } else {
+        }
+        else {
             if (m_config->showDurations() == ShowDurations::Always)
                 stream << _sectionStats.sectionInfo.name << " completed in "
-                       << _sectionStats.durationInSeconds << "s" << std::endl;
+                << _sectionStats.durationInSeconds << "s" << std::endl;
         }
         StreamingReporterBase::sectionEnded(_sectionStats);
     }
@@ -92,7 +93,7 @@ public:
         if (currentGroupInfo.used) {
             printSummaryDivider();
             stream << "Summary for group '" << _testGroupStats.groupInfo.name
-                   << "':\n";
+                << "':\n";
             printTotals(_testGroupStats.totals);
             stream << "\n" << std::endl;
         }
@@ -123,7 +124,7 @@ private:
             , printInfoMessages(_printInfoMessages)
         {
             switch (result.getResultType()) {
-            case ResultWas::Ok:
+                case ResultWas::Ok:
                 colour = Colour::Success;
                 passOrFail = "PASSED";
                 // if( result.hasMessage() )
@@ -132,11 +133,12 @@ private:
                 if (_stats.infoMessages.size() > 1)
                     messageLabel = "with messages";
                 break;
-            case ResultWas::ExpressionFailed:
+                case ResultWas::ExpressionFailed:
                 if (result.isOk()) {
                     colour = Colour::Success;
                     passOrFail = "FAILED - but was ok";
-                } else {
+                }
+                else {
                     colour = Colour::Error;
                     passOrFail = "FAILED";
                 }
@@ -145,23 +147,23 @@ private:
                 if (_stats.infoMessages.size() > 1)
                     messageLabel = "with messages";
                 break;
-            case ResultWas::ThrewException:
+                case ResultWas::ThrewException:
                 colour = Colour::Error;
                 passOrFail = "FAILED";
                 messageLabel = "due to unexpected exception with message";
                 break;
-            case ResultWas::DidntThrowException:
+                case ResultWas::DidntThrowException:
                 colour = Colour::Error;
                 passOrFail = "FAILED";
                 messageLabel = "because no exception was thrown where one was expected";
                 break;
-            case ResultWas::Info:
+                case ResultWas::Info:
                 messageLabel = "info";
                 break;
-            case ResultWas::Warning:
+                case ResultWas::Warning:
                 messageLabel = "warning";
                 break;
-            case ResultWas::ExplicitFailure:
+                case ResultWas::ExplicitFailure:
                 passOrFail = "FAILED";
                 colour = Colour::Error;
                 if (_stats.infoMessages.size() == 1)
@@ -169,11 +171,10 @@ private:
                 if (_stats.infoMessages.size() > 1)
                     messageLabel = "explicitly with messages";
                 break;
-            // These cases are here to prevent compiler warnings
-            case ResultWas::Unknown:
-            case ResultWas::FailureBit:
-            case ResultWas::Exception:
-            case ResultWas::FatalErrorCondition:
+                // These cases are here to prevent compiler warnings
+                case ResultWas::Unknown:
+                case ResultWas::FailureBit:
+                case ResultWas::Exception:
                 passOrFail = "** internal error **";
                 colour = Colour::Error;
                 break;
@@ -189,7 +190,8 @@ private:
                 printResultType();
                 printOriginalExpression();
                 printReconstructedExpression();
-            } else {
+            }
+            else {
                 stream << "\n";
             }
             printMessage();
@@ -232,9 +234,9 @@ private:
         {
             if (!messageLabel.empty())
                 stream << messageLabel << ":"
-                       << "\n";
+                << "\n";
             for (std::vector<MessageInfo>::const_iterator it = messages.begin(),
-                                                          itEnd = messages.end();
+                 itEnd = messages.end();
                  it != itEnd; ++it) {
                 // If this assertion is a warning ignore any INFO messages
                 if (printInfoMessages || it->type != ResultWas::Info)
@@ -276,12 +278,12 @@ private:
         stream << "\n" << getLineOfChars<'~'>() << "\n";
         Colour colour(Colour::SecondaryText);
         stream << currentTestRunInfo->name << " is a Catch v"
-               << libraryVersion.majorVersion << "." << libraryVersion.minorVersion
-               << " b" << libraryVersion.buildNumber;
+            << libraryVersion.majorVersion << "." << libraryVersion.minorVersion
+            << " b" << libraryVersion.buildNumber;
         if (libraryVersion.branchName != std::string("master"))
             stream << " (" << libraryVersion.branchName << ")";
         stream << " host application.\n"
-               << "Run with -? for options\n\n";
+            << "Run with -? for options\n\n";
 
         currentTestRunInfo.used = true;
     }
@@ -301,8 +303,8 @@ private:
             Colour colourGuard(Colour::Headers);
 
             std::vector<SectionInfo>::const_iterator
-            it = m_sectionStack.begin() + 1, // Skip first section (test case)
-            itEnd = m_sectionStack.end();
+                it = m_sectionStack.begin() + 1, // Skip first section (test case)
+                itEnd = m_sectionStack.end();
             for (; it != itEnd; ++it)
                 printHeaderString(it->name, 2);
         }
@@ -376,12 +378,14 @@ private:
     {
         if (totals.testCases.total() == 0) {
             stream << Colour(Colour::Warning) << "No tests ran\n";
-        } else if (totals.assertions.total() > 0 && totals.assertions.allPassed()) {
+        }
+        else if (totals.assertions.total() > 0 && totals.assertions.allPassed()) {
             stream << Colour(Colour::ResultSuccess) << "All tests passed";
             stream << " (" << pluralise(totals.assertions.passed, "assertion")
-                   << " in " << pluralise(totals.testCases.passed, "test case") << ")"
-                   << "\n";
-        } else {
+                << " in " << pluralise(totals.testCases.passed, "test case") << ")"
+                << "\n";
+        }
+        else {
 
             std::vector<SummaryColumn> columns;
             columns.push_back(SummaryColumn("", Colour::None)
@@ -394,9 +398,9 @@ private:
                               .addRow(totals.testCases.failed)
                               .addRow(totals.assertions.failed));
             columns.push_back(
-            SummaryColumn("failed as expected", Colour::ResultExpectedFailure)
-            .addRow(totals.testCases.failedButOk)
-            .addRow(totals.assertions.failedButOk));
+                SummaryColumn("failed as expected", Colour::ResultExpectedFailure)
+                .addRow(totals.testCases.failedButOk)
+                .addRow(totals.assertions.failedButOk));
 
             printSummaryRow("test cases", columns, 0);
             printSummaryRow("assertions", columns, 1);
@@ -415,7 +419,8 @@ private:
                     stream << value;
                 else
                     stream << Colour(Colour::Warning) << "- none -";
-            } else if (value != "0") {
+            }
+            else if (value != "0") {
                 stream << Colour(Colour::LightGrey) << " | ";
                 stream << Colour(it->colour) << value << " " << it->label;
             }
@@ -451,15 +456,16 @@ private:
 
             stream << Colour(Colour::Error) << std::string(failedRatio, '=');
             stream << Colour(Colour::ResultExpectedFailure)
-                   << std::string(failedButOkRatio, '=');
+                << std::string(failedButOkRatio, '=');
             if (totals.testCases.allPassed())
                 stream << Colour(Colour::ResultSuccess)
-                       << std::string(passedRatio, '=');
+                << std::string(passedRatio, '=');
             else
                 stream << Colour(Colour::Success) << std::string(passedRatio, '=');
-        } else {
+        }
+        else {
             stream << Colour(Colour::Warning)
-                   << std::string(CATCH_CONFIG_CONSOLE_WIDTH - 1, '=');
+                << std::string(CATCH_CONFIG_CONSOLE_WIDTH - 1, '=');
         }
         stream << "\n";
     }
@@ -488,7 +494,7 @@ int main(int argc, char* argv[])
     auto& configData = session.configData();
     configData.verbosity = Catch::Verbosity::Normal;
     configData.showDurations = Catch::ShowDurations::Always;
-    configData.reporterNames.push_back("canvas_reporter");
+    configData.reporterName = "canvas_reporter";
 
     int result = session.applyCommandLine(argc, argv);
     return result == 0 ? session.run() : result;
