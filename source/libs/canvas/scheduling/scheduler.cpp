@@ -44,12 +44,12 @@ public:
     }
 
 private:
+    std::deque<task_type> m_tasks;
+
     std::mutex m_mutex;
     std::condition_variable m_available;
 
     std::atomic<bool> m_cancelled{false};
-
-    std::deque<task_type> m_tasks;
 };
 
 scheduler::scheduler()
